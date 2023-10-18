@@ -148,9 +148,13 @@ coor = coor.iloc[index_start:index_end,:]
 
 #Fetch the distance to TSS information
 gene = pd.read_csv(args.geneFile,sep='\t',header=None,comment='#')
-geneinds = pd.match(coor.iloc[:,0].map(str).str.replace('chr','')+' '+coor.iloc[:,1].map(str),
-            gene.iloc[:,0].map(str).str.replace('chr','')+' '+gene.iloc[:,2].map(str))
-if np.any(geneinds==-1):
+s = coor.iloc[:,0].map(str).str.replace('chr','')+' '+coor.iloc[:,1].map(str)
+gene_series = gene.iloc[:,0].map(str).str.replace('chr','')+' '+gene.iloc[:,2].map(str)
+
+genebool = s.isin(gene_series)
+geneinds = gene_series.index[genebool]
+
+if geneinds.size == 0:
     raise ValueError("Gene association file does not match the vcf file.")
 if args.fixeddist == 0:
     dist = - np.asarray(gene.iloc[geneinds,-1])
